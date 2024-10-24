@@ -8,6 +8,8 @@ log() {
 
 log "Creating UDN CR and VM..."
 
+oc project demo
+
 oc apply -f udn.yml
 
 oc create -f vm.yml

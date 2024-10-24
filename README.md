@@ -27,7 +27,7 @@ Which runs the following scripts, which you may opt to run one-by-one (especiall
 
 Creates an openshift cluster on AWS w/ baremetal workers.
 
-If you want customized by exporting these variables:
+If you want to customize, `export` any of the following variables:
 
 - `OPENSHIFT_RELEASE`: Specifies the OpenShift release version. Default is `4.18.0-0.nightly-2024-10-23-112324`.
 - `CLUSTER_NAME`: Name of the cluster to be used in the install configuration. If not set, it defaults to a combination of the current username, `cnvmetal`, and the day of the month.
@@ -40,7 +40,7 @@ This will export `KUBECONFIG=./openshift-$OPENSHIFT_RELEASE/install/auth/kubecon
 
 ### `02-cnv-setup.sh`
 
-Installs the latest CNV.
+Installs the latest CNV. You can `export`:
 
 - `CNV_VERSION`: Default is `4.99`
 
@@ -65,7 +65,7 @@ No configurable options.
 Creates a UDN CR and launches a Fedora VM.
 
 
-### Validation
+## Validation
 
 You can then [use virtctl](https://kubevirt.io/user-guide/user_workloads/virtctl_client_tool/) to access your vm:
 
@@ -81,6 +81,13 @@ And you can inspect the UDN networks with:
 oc get pods
 oc get pod virt-launcher-fedora-vm-xyz -o jsonpath="{.metadata.annotations['k8s\.ovn\.org/pod-networks']}"
 ```
+
+You can migrate the pod using the openshift console, using the administrator view, browse to:
+
+```
+Virtualization -> VirtualMachines -> [select fedora-vm] -> Diagnostics [tab] -> Diagnostics
+```
+
 
 ## Cleaning up your mess...
 
