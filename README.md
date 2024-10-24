@@ -6,7 +6,8 @@ The goal of the demo environment is to have an environment which has both UDN av
 
 ## Requirements
 
-* An AWS account for openshift devcluster* (you have a ~/.aws/ dir with creds)
+* An AWS account for openshift-dev (you have a ~/.aws/ dir with creds)
+  * In my experience you must also have `awscli` installed (via dnf, maybe) and have ran `aws configure`
 * You have pull secrets for...
   * `quay.io/openshift-cnv`
   * `registry.ci.openshift.org` (and build repos, e.g. `registry.build01...`, `registry.build05...`)
