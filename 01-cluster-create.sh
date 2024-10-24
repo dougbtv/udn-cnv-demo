@@ -13,8 +13,11 @@ for program in helm oc jq; do
     fi
 done
 
+# Pull secrets
 PULL_SECRET_PATH="${PULL_SECRET_PATH:-pull-secret.txt}"
 PUBKEY_PATH="${PUBKEY_PATH:-ssh.pub}"
+
+AWS_REGION="${AWS_REGION:-us-west-2}"
 
 # Define the OpenShift release version, allowing for an override
 OPENSHIFT_RELEASE="${OPENSHIFT_RELEASE:-4.18.0-0.nightly-2024-10-23-112324}"
@@ -89,7 +92,7 @@ networking:
   - 172.30.0.0/16
 platform:
   aws:
-    region: us-west-2
+    region: $AWS_REGION
 publish: External
 pullSecret: '$PULL_SECRET'
 sshKey: |

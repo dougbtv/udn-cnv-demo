@@ -34,6 +34,7 @@ If you want to customize, `export` any of the following variables:
 - `CLUSTER_NAME`: Name of the cluster to be used in the install configuration. If not set, it defaults to a combination of the current username, `cnvmetal`, and the day of the month.
 - `PULL_SECRET_PATH`: Path to the pull secret file. Default is `pull-secret.txt`.
 - `PUBKEY_PATH`: Path to the SSH public key file. Default is `ssh.pub`.
+- `AWS_REGION`: Which [AWS region](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html) will be used, default is `us-west-2`.
 
 You can find a log of the install in the downloaded directory based on the release version in the project root, like `./openshift-$OPENSHIFT_RELEASE/install.log`, which includes your login creds.
 
