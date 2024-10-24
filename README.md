@@ -82,3 +82,11 @@ oc get pods
 oc get pod virt-launcher-fedora-vm-xyz -o jsonpath="{.metadata.annotations['k8s\.ovn\.org/pod-networks']}"
 ```
 
+## Cleaning up your mess...
+
+To delete a cluster, you can do it manually like:
+
+```
+cd openshift-4.18.0-0.nightly-2024-10-23-112324/
+./openshift-install destroy cluster --dir "$(pwd)/install"
+```
