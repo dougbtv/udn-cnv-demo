@@ -13,6 +13,9 @@ for program in helm oc jq; do
     fi
 done
 
+PULL_SECRET_PATH="${PULL_SECRET_PATH:-pull-secret.txt}"
+PUBKEY_PATH="${PUBKEY_PATH:-ssh.pub}"
+
 # Define the OpenShift release version, allowing for an override
 OPENSHIFT_RELEASE="${OPENSHIFT_RELEASE:-4.18.0-0.nightly-2024-10-23-112324}"
 
@@ -37,9 +40,9 @@ else
 fi
 
 # Check for required files
-for file in pull-secret.txt ssh.pub; do
+for file in $PULL_SECRET_PATH $PUBKEY_PATH; do
     if [ ! -f "./$file" ]; then
-        log "$file is not present in the working directory."
+        log "$file not found, you should put it there (or change it)."
         exit 1
     fi
 done
@@ -48,8 +51,8 @@ done
 CLUSTER_NAME="${CLUSTER_NAME:-$(whoami)cnvmetal$(date +%d)}"
 
 # Extract the pull secret and SSH key
-PULL_SECRET=$(jq -c . < ./pull-secret.txt)
-SSH_KEY=$(cat ssh.pub)
+PULL_SECRET=$(jq -c . < "$PULL_SECRET_PATH")
+SSH_KEY=$(cat "$PUBKEY_PATH")
 
 # Create the YAML file
 cat > "$INSTALL_DIR/install-config.yaml" <<EOF
@@ -95,3 +98,10 @@ EOF
 
 # Output the cluster name
 log "Generated install-config.yaml for cluster: $CLUSTER_NAME"
+
+
+"$DOWNLOAD_DIR/openshift-install" create cluster --dir "$INSTALL_DIR" | tee "$DOWNLOAD_DIR/install.log"
+if [ ${PIPESTATUS[0]} -ne 0 ]; then
+    log "Error: openshift-install command failed."
+    exit 1
+fi
