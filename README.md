@@ -83,11 +83,15 @@ oc get pods
 oc get pod virt-launcher-fedora-vm-xyz -o jsonpath="{.metadata.annotations['k8s\.ovn\.org/pod-networks']}"
 ```
 
-You can migrate the pod using the openshift console, using the administrator view, browse to:
+You can migrate the pod using the openshift console.
+
+First, using the administrator view, browse to:
 
 ```
 Virtualization -> VirtualMachines -> [select fedora-vm] -> Diagnostics [tab] -> Diagnostics
 ```
+
+And validate that the `LiveMigratable` property's status is `True`
 
 
 ## Cleaning up your mess...

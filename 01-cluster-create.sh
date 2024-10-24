@@ -106,5 +106,4 @@ if [ ${PIPESTATUS[0]} -ne 0 ]; then
     exit 1
 fi
 
-export KUBECONFIG="$INSTALL_DIR/auth/kubeconfig"
-log "Exported Kubeconfig to $INSTALL_DIR/auth/kubeconfig"
+log "You should run: export KUBECONFIG=$INSTALL_DIR/auth/kubeconfig"
