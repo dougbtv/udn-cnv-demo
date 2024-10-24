@@ -100,8 +100,11 @@ EOF
 log "Generated install-config.yaml for cluster: $CLUSTER_NAME"
 
 
-"$DOWNLOAD_DIR/openshift-install" create cluster --dir "$INSTALL_DIR" | tee "$DOWNLOAD_DIR/install.log"
+"$DOWNLOAD_DIR/openshift-install" create cluster --dir "$INSTALL_DIR" 2>&1 | tee "$DOWNLOAD_DIR/install.log"
 if [ ${PIPESTATUS[0]} -ne 0 ]; then
     log "Error: openshift-install command failed."
     exit 1
 fi
+
+export KUBECONFIG="$INSTALL_DIR/auth/kubeconfig"
+log "Exported Kubeconfig to $INSTALL_DIR/auth/kubeconfig"

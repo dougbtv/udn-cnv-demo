@@ -1,32 +1,36 @@
 #!/bin/bash
 
-CNV_VERSION=4.99
-QUAY_AUTH="BAD"
-QUAY_AUTH_JSON=$(jq -n --arg auth "$QUAY_AUTH" '{"quay.io/openshift-cnv":{"auth":$auth}}')
+CNV_VERSION="${CNV_VERSION:-4.99}"
+# QUAY_AUTH="BAD"
+# QUAY_AUTH_JSON=$(jq -n --arg auth "$QUAY_AUTH" '{"quay.io/openshift-cnv":{"auth":$auth}}')
 
 log() {
   local message="$1"
   echo "$(date '+%Y-%m-%d %H:%M:%S') - $message"
 }
 
-# Get the global pull secret and decode it
-oc get secret pull-secret -n openshift-config -o json | \
-    jq -r '.data.".dockerconfigjson"' | base64 -d > global-pull-secret.json
+# -------------------------------------------------------------------------------- 
+# I put the pull secret for it in my overall pull secret.
+# --------------------------------------------------------------------------------
 
-# Update the pull secret with the new quay.io entry
-jq --argjson QUAY_AUTH_JSON "$QUAY_AUTH_JSON" '.auths += $QUAY_AUTH_JSON' \
-    global-pull-secret.json > global-pull-secret.json.tmp
+# # Get the global pull secret and decode it
+# oc get secret pull-secret -n openshift-config -o json | \
+#     jq -r '.data.".dockerconfigjson"' | base64 -d > global-pull-secret.json
 
-# Replace the original pull secret with the updated one
-mv global-pull-secret.json.tmp global-pull-secret.json
+# # Update the pull secret with the new quay.io entry
+# jq --argjson QUAY_AUTH_JSON "$QUAY_AUTH_JSON" '.auths += $QUAY_AUTH_JSON' \
+#     global-pull-secret.json > global-pull-secret.json.tmp
 
-log "Updating openshift pull secret (and waiting 5 seconds)..."
+# # Replace the original pull secret with the updated one
+# mv global-pull-secret.json.tmp global-pull-secret.json
 
-oc set data secret/pull-secret -n openshift-config --from-file=.dockerconfigjson=global-pull-secret.json
+# log "Updating openshift pull secret (and waiting 5 seconds)..."
 
-rm global-pull-secret.json
+# oc set data secret/pull-secret -n openshift-config --from-file=.dockerconfigjson=global-pull-secret.json
 
-sleep 5
+# rm global-pull-secret.json
+
+# sleep 5
 
 log "Waiting for mcp master worker..."
 
@@ -82,10 +86,22 @@ spec:
   channel: "nightly-${CNV_VERSION}"
 EOF
 
-log "Waiting for HyperConverged in api-resources"
+log "Waiting 40 minutes for HyperConverged in api-resources"
 
-while ! oc api-resources |grep HyperConverged; do
-    sleep 1
+# Timeout in seconds (40 minutes * 60 seconds/minute)
+timeout=2400
+start_time=$(date +%s)
+
+while ! oc api-resources | grep -q HyperConverged; do
+    current_time=$(date +%s)
+    elapsed_time=$((current_time - start_time))
+
+    if [ "$elapsed_time" -ge "$timeout" ]; then
+        log "ERROR: Timeout reached: HyperConverged resource not found after 40 minutes."
+        exit 1
+    fi
+
+    sleep 2
 done
 
 cat <<EOF | oc apply -f -
