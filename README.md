@@ -65,46 +65,20 @@ No configurable options.
 Creates a UDN CR and launches a Fedora VM.
 
 
+### Validation
 
-## Scratchpad
-
-This worked for a CNV migration!
-
-oc new-project demo
-oc label --overwrite ns demo pod-security.kubernetes.io/enforce=privileged
-
-oc create -f nfs.yml
-
-oc get svc
-
-(save the IP and use below)
-
-helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
-helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
-  --set nfs.server=172.30.190.178 \
-  --set nfs.path=/ \
-  --set nfs.mountOptions[0]=nfsvers=4 \
-  --set storageClass.accessModes=ReadWriteMany
+You can then [use virtctl](https://kubevirt.io/user-guide/user_workloads/virtctl_client_tool/) to access your vm:
 
 ```
-oc create -f dv-url.yml
-```
-
-*OR*
-
-```
-oc create -f dv.yml
-virtctl image-upload dv fedora40-upload   --image-path=/home/centoshdd/qcow/Fedora-Cloud-Base-Generic.x86_64-40-1.14.qcow2   --insecure
-```
-
-## UDN
-
-oc apply -f udn.yml
-
-oc create -f vm.yml
-
 virtctl console fedora-vm 
-(login with: fedora/fedora)
+```
 
-oc get pod virt-launcher-fedora-vm-sz7tr -o jsonpath="{.metadata.annotations['k8s\.ovn\.org/pod-networks']}"
+(login with: `fedora`/`fedora`)
+
+And you can inspect the UDN networks with:
+
+```
+oc get pods
+oc get pod virt-launcher-fedora-vm-xyz -o jsonpath="{.metadata.annotations['k8s\.ovn\.org/pod-networks']}"
+```
 
