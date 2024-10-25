@@ -111,12 +111,3 @@ To delete a cluster, you can do it manually like:
 cd openshift-4.18.0-0.nightly-2024-10-23-112324/
 ./openshift-install destroy cluster --dir "$(pwd)/install"
 ```
-
-
-## scratch
-
-```
-$ oc patch hco -n openshift-cnv kubevirt-hyperconverged --type=json -p='[{"op":"replace","path":"/spec/featureGates/primaryUserDefinedNetworkBinding","value":true},{"op":"replace","path":"/spec/featureGates/deployKubevirtIpamController","value":true}]'
-```
-
-
