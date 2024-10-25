@@ -72,7 +72,7 @@ Creates a UDN CR and launches a Fedora VM.
 You can then [use virtctl](https://kubevirt.io/user-guide/user_workloads/virtctl_client_tool/) to access your vm:
 
 ```
-virtctl console fedora-vm 
+virtctl console vm-a
 ```
 
 (login with: `fedora`/`fedora`)
@@ -81,7 +81,7 @@ And you can inspect the UDN networks with:
 
 ```
 oc get pods
-oc get pod virt-launcher-fedora-vm-xyz -o jsonpath="{.metadata.annotations['k8s\.ovn\.org/pod-networks']}"
+oc get pod virt-launcher-vm-a-fwt5v -o jsonpath="{.metadata.annotations['k8s\.ovn\.org/pod-networks']}"
 ```
 
 You can migrate the pod using the openshift console.
@@ -92,7 +92,15 @@ First, using the administrator view, browse to:
 Virtualization -> VirtualMachines -> [select fedora-vm] -> Diagnostics [tab] -> Diagnostics
 ```
 
-And validate that the `LiveMigratable` property's status is `True`
+And validate that the `LiveMigratable` property's status is `True` (there's probably a way to this from the CLI, too)
+
+Then you can kick off the migration with...
+
+```
+virtctl migrate vm-a
+```
+
+And then `oc get pods -o wide` to see that it's happened.
 
 
 ## Cleaning up your mess...
@@ -103,3 +111,12 @@ To delete a cluster, you can do it manually like:
 cd openshift-4.18.0-0.nightly-2024-10-23-112324/
 ./openshift-install destroy cluster --dir "$(pwd)/install"
 ```
+
+
+## scratch
+
+```
+$ oc patch hco -n openshift-cnv kubevirt-hyperconverged --type=json -p='[{"op":"replace","path":"/spec/featureGates/primaryUserDefinedNetworkBinding","value":true},{"op":"replace","path":"/spec/featureGates/deployKubevirtIpamController","value":true}]'
+```
+
+

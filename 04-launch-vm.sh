@@ -6,6 +6,8 @@ log() {
   echo "$(date '+%Y-%m-%d %H:%M:%S') - $message"
 }
 
+oc apply -f udn.yml
+
 # This resulted in no change, but...
 oc patch hco -n openshift-cnv kubevirt-hyperconverged --type=json -p='[{"op":"replace","path":"/spec/featureGates/primaryUserDefinedNetworkBinding","value":true},{"op":"replace","path":"/spec/featureGates/deployKubevirtIpamController","value":true}]'
 
@@ -13,7 +15,6 @@ oc create -f vm-miguel.yml
 
 # log "Creating UDN CR and VM..."
 # oc project demo
-# oc apply -f udn.yml
 # oc create -f vm.yml
 
 log "You can console to your vm with:"
