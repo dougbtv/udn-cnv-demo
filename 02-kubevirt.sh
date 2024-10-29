@@ -32,7 +32,7 @@ get_kubevirt_release_url() {
 }
 
 kubevirt_release_url=$(get_kubevirt_release_url nightly)
-echo $kubevirt_release_url 
+log "Using kubevirt URL: $kubevirt_release_url"
 
 log "Applying Kubevirt operator yaml"
 oc apply -f "${kubevirt_release_url}/kubevirt-operator.yaml"
