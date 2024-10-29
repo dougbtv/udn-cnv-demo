@@ -1,3 +1,10 @@
+#!/bin/bash
+
+log() {
+  local message="$1"
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - $message"
+}
+
 get_kubevirt_release_url() {
     local VERSION="$1"
 
@@ -27,9 +34,11 @@ get_kubevirt_release_url() {
 kubevirt_release_url=$(get_kubevirt_release_url nightly)
 echo $kubevirt_release_url 
 
+log "Applying Kubevirt operator yaml"
 oc apply -f "${kubevirt_release_url}/kubevirt-operator.yaml"
 oc apply -f "${kubevirt_release_url}/kubevirt-cr.yaml"
 oc -n kubevirt patch kubevirt kubevirt --type=merge --patch '{"spec":{"configuration":{"virtualMachineOptions":{"disableSerialConsoleLog":{}}}}}'
+log "Waiting up to 15 minutes for Kubevirt to be available"
 oc wait -n kubevirt kv kubevirt --for condition=Available --timeout 15m
 oc -n kubevirt patch kubevirt kubevirt --type=json --patch '[{"op":"add","path":"/spec/configuration/developerConfiguration","value":{"featureGates":[]}},{"op":"add","path":"/spec/configuration/developerConfiguration/featureGates/-","value":"NetworkBindingPlugins"},{"op":"add","path":"/spec/configuration/developerConfiguration/featureGates/-","value":"DynamicPodInterfaceNaming"}]'
 kubevirt_stable_release_url=$(get_kubevirt_release_url "stable")
@@ -37,12 +46,14 @@ passt_binding_image="quay.io/kubevirt/network-passt-binding:${kubevirt_stable_re
 oc -n kubevirt patch kubevirt kubevirt --type=json --patch '[{"op":"add","path":"/spec/configuration/network","value":{}},{"op":"add","path":"/spec/configuration/network/binding","value":{"passt":{"computeResourceOverhead":{"requests":{"memory":"500Mi"}},"migration":{"method":"link-refresh"},"networkAttachmentDefinition":"default/primary-udn-kubevirt-binding","sidecarImage":"'"${passt_binding_image}"'"},"managedTap":{"domainAttachmentType":"managedTap","migration":{}}}}]'
 
 
+log "Installing ipam extensions yaml"
 manifest="https://raw.githubusercontent.com/kubevirt/ipam-extensions/main/dist/install.yaml"
 oc apply -f "$manifest"
+log "Waiting 2 minutes for kubevirt ipam controller to be ready"
 oc wait -n kubevirt-ipam-controller-system deployment kubevirt-ipam-controller-manager --for condition=Available --timeout 2m
 
 #!/bin/bash -xe
-kubectl patch kubevirts -n kubevirt kubevirt --type=json -p="[{\"op\": \"add\", \"path\": \"/spec/configuration/network\",   \"value\": {
+oc patch kubevirts -n kubevirt kubevirt --type=json -p="[{\"op\": \"add\", \"path\": \"/spec/configuration/network\",   \"value\": {
       \"binding\": {
           \"managedTap\": {
               \"domainAttachmentType\": \"managedTap\",
@@ -51,7 +62,7 @@ kubectl patch kubevirts -n kubevirt kubevirt --type=json -p="[{\"op\": \"add\", 
       }
   }}]"
 
-kubectl apply -f - <<EOF
+oc apply -f - <<EOF
 ---
 apiVersion: kubevirt.io/v1
 kind: KubeVirt

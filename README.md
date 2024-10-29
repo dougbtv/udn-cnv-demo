@@ -11,6 +11,8 @@ The goal of the demo environment is to have an environment which has both UDN av
 * You have pull secrets for...
   * `quay.io/openshift-cnv`
   * `registry.ci.openshift.org` (and build repos, e.g. `registry.build01...`, `registry.build05...`)
+* `oc`, `jq`, and `virtctl` are installed
+  * If you want, try the `99-install-virtctl.sh` to install virtctl
 
 *...It could be potentially useful in parts without an AWS cluster spin up.
 
