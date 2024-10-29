@@ -47,10 +47,38 @@ oc -n kubevirt patch kubevirt kubevirt --type=json --patch '[{"op":"add","path":
 
 
 log "Installing ipam extensions yaml"
-manifest="https://raw.githubusercontent.com/kubevirt/ipam-extensions/main/dist/install.yaml"
-oc apply -f "$manifest"
-log "Waiting 2 minutes for kubevirt ipam controller to be ready"
-oc wait -n kubevirt-ipam-controller-system deployment kubevirt-ipam-controller-manager --for condition=Available --timeout 2m
+if [ ! -d "ipam-extensions" ]; then
+  log "Yo, ipam-extensions dir doesn't exist here, cloning it..."
+  git clone https://github.com/kubevirt/ipam-extensions.git
+else
+  log "Rad -- The ipam-extensions directory is already here, ready to roll."
+fi
+
+pushd ipam-extensions
+
+log "Installing cert-manager..."
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.1/cert-manager.yaml
+
+log "Waiting up to 20 minutes for cert manager to be ready..."
+oc wait -n cert-manager deployment/cert-manager --for=condition=Available --timeout=10m
+oc wait -n cert-manager deployment/cert-manager-cainjector --for=condition=Available --timeout=5m
+oc wait -n cert-manager deployment/cert-manager-webhook --for=condition=Available --timeout=5m
+
+IPAM_CONTROLLER_IMAGE="ghcr.io/kubevirt/ipam-controller:latest"
+log "using $IPAM_CONTROLLER_IMAGE"
+
+log "Making deploy... (this might take a bit to install deps)"
+make deploy IMG=$IPAM_CONTROLLER_IMAGE
+
+log "Waiting on deployment/kubevirt-ipam-controller-manager for 10 minutes"
+oc wait -n kubevirt-ipam-controller-system deployment/kubevirt-ipam-controller-manager --for=condition=Available --timeout=10m
+
+popd
+
+# manifest="https://raw.githubusercontent.com/kubevirt/ipam-extensions/main/dist/install.yaml"
+# oc apply -f "$manifest"
+# log "Waiting 2 minutes for kubevirt ipam controller to be ready"
+# oc wait -n kubevirt-ipam-controller-system deployment kubevirt-ipam-controller-manager --for condition=Available --timeout 2m
 
 #!/bin/bash -xe
 oc patch kubevirts -n kubevirt kubevirt --type=json -p="[{\"op\": \"add\", \"path\": \"/spec/configuration/network\",   \"value\": {
