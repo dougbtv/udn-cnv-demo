@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# This is for an upstream kubevirt install on openshift.
+# ...For now, this is not the preferred approach.
+log "WARNING: Are you sure you want to run an upstream kubevirt install? Because... that's happening..."
+
 log() {
   local message="$1"
   echo "$(date '+%Y-%m-%d %H:%M:%S') - $message"

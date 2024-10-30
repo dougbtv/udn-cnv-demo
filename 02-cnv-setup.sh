@@ -9,31 +9,6 @@ log() {
   echo "$(date '+%Y-%m-%d %H:%M:%S') - $message"
 }
 
-# -------------------------------------------------------------------------------- 
-# I put the pull secret for it in my overall pull secret.
-# --------------------------------------------------------------------------------
-
-# # Get the global pull secret and decode it
-# oc get secret pull-secret -n openshift-config -o json | \
-#     jq -r '.data.".dockerconfigjson"' | base64 -d > global-pull-secret.json
-
-# # Update the pull secret with the new quay.io entry
-# jq --argjson QUAY_AUTH_JSON "$QUAY_AUTH_JSON" '.auths += $QUAY_AUTH_JSON' \
-#     global-pull-secret.json > global-pull-secret.json.tmp
-
-# # Replace the original pull secret with the updated one
-# mv global-pull-secret.json.tmp global-pull-secret.json
-
-# log "Updating openshift pull secret (and waiting 5 seconds)..."
-
-# oc set data secret/pull-secret -n openshift-config --from-file=.dockerconfigjson=global-pull-secret.json
-
-# rm global-pull-secret.json
-
-# sleep 5
-
-# --------------- end, alternative pull secret
-
 log "Waiting for mcp master worker..."
 
 oc wait mcp master worker --for condition=updated --timeout=20m
@@ -142,7 +117,7 @@ oc patch hyperconverged kubevirt-hyperconverged -n openshift-cnv --type=json -p=
 # I had this previously, and this resulted in no change, but... I think they're the same.
 # oc patch hco -n openshift-cnv kubevirt-hyperconverged --type=json -p='[{"op":"replace","path":"/spec/featureGates/primaryUserDefinedNetworkBinding","value":true},{"op":"replace","path":"/spec/featureGates/deployKubevirtIpamController","value":true}]'
 
-log "Make the HCO unmanaged"
+log "Make the HCO unmanaged (and wait 5 minutes for it to scale down)"
 oc scale -n openshift-cnv --replicas=0 deployment hco-operator 
 oc wait -n openshift-cnv deployment/hco-operator --for=jsonpath='{.status.replicas}'=0 --timeout=5m
 
