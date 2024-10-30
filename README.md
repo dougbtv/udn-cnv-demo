@@ -58,6 +58,8 @@ watch -n2 oc get pods -n openshift-cnv
 
 ### `03-storage-setup.sh`
 
+**STATUS: Currently optional** (for now, it might improve perf later? I'll try later.)
+
 Creates an NFS storage scheme to provide RWX PVCs to support Kubevirt migration.
 
 Create a Fedora 40 image, using that storage, to run VMs from.
@@ -69,6 +71,8 @@ No configurable options.
 ### `04-launch-vm.sh`
 
 Creates a UDN CR and launches a Fedora VM.
+
+These run in the `poc1` namespace, for now.
 
 Notes...
 
@@ -83,7 +87,7 @@ shows if the ipamclaims have the persistent IPs.
 You can then [use virtctl](https://kubevirt.io/user-guide/user_workloads/virtctl_client_tool/) to access your vm:
 
 ```
-virtctl console vm-a
+virtctl console vmi-fedora-a
 ```
 
 (login with: `fedora`/`fedora`)
@@ -92,7 +96,7 @@ And you can inspect the UDN networks with:
 
 ```
 oc get pods
-oc get pod virt-launcher-vm-a-fwt5v -o jsonpath="{.metadata.annotations['k8s\.ovn\.org/pod-networks']}"
+oc get pod virt-launcher-vmi-fedora-a-fwt5v -o jsonpath="{.metadata.annotations['k8s\.ovn\.org/pod-networks']}"
 ```
 
 You can migrate the pod using the openshift console.
@@ -108,11 +112,12 @@ And validate that the `LiveMigratable` property's status is `True` (there's prob
 Then you can kick off the migration with...
 
 ```
-virtctl migrate vm-a
+virtctl migrate vmi-fedora-a
 ```
 
 And then `oc get pods -o wide` to see that it's happened.
 
+I also have a `samplepod` named pod running, I will ping the persistent IP on vmi-fedora-a while it's running.
 
 ## Cleaning up your mess...
 

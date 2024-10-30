@@ -5,6 +5,7 @@ metadata:
 spec:
   topology: Layer2 
   layer2: 
+    ipamLifecycle: Persistent
     role: Primary 
     subnets:
       - "10.0.0.0/24"

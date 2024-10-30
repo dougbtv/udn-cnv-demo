@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: image-preload
+spec:
+  selector:
+    matchLabels:
+      app: image-preload
+  template:
+    metadata:
+      labels:
+        app: image-preload
+    spec:
+      containers:
+      - name: preload
+        image: quay.io/dougbtv/alpine
+        command: ["sh", "-c", "sleep 3600"] # Keeps the container running temporarily
+      tolerations:
+      - operator: Exists
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
