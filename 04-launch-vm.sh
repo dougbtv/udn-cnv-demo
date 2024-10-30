@@ -8,9 +8,6 @@ log() {
 
 oc apply -f udn.yml
 
-# This resulted in no change, but...
-oc patch hco -n openshift-cnv kubevirt-hyperconverged --type=json -p='[{"op":"replace","path":"/spec/featureGates/primaryUserDefinedNetworkBinding","value":true},{"op":"replace","path":"/spec/featureGates/deployKubevirtIpamController","value":true}]'
-
 oc create -f vm-miguel.yml
 
 # log "Creating UDN CR and VM..."

@@ -32,6 +32,8 @@ log() {
 
 # sleep 5
 
+# --------------- end, alternative pull secret
+
 log "Waiting for mcp master worker..."
 
 oc wait mcp master worker --for condition=updated --timeout=20m
@@ -119,3 +121,56 @@ EOF
 log "Waiting 30 minutes for hyperconverged"
 
 oc wait HyperConverged kubevirt-hyperconverged -n openshift-cnv --for condition=Available --timeout=30m
+
+log "Patching HCO with feature gates..."
+
+oc patch hyperconverged kubevirt-hyperconverged -n openshift-cnv --type=json -p='
+[
+  {
+    "op": "replace",
+    "path": "/spec/featureGates/primaryUserDefinedNetworkBinding",
+    "value": true
+  },
+  {
+    "op": "replace",
+    "path": "/spec/featureGates/deployKubevirtIpamController",
+    "value": true
+  }
+]
+'
+
+# I had this previously, and this resulted in no change, but... I think they're the same.
+# oc patch hco -n openshift-cnv kubevirt-hyperconverged --type=json -p='[{"op":"replace","path":"/spec/featureGates/primaryUserDefinedNetworkBinding","value":true},{"op":"replace","path":"/spec/featureGates/deployKubevirtIpamController","value":true}]'
+
+log "Make the HCO unmanaged"
+oc scale -n openshift-cnv --replicas=0 deployment hco-operator 
+oc wait -n openshift-cnv deployment/hco-operator --for=jsonpath='{.status.replicas}'=0 --timeout=5m
+
+log "Manually patch the KubeVirt configuration"
+
+oc -n openshift-cnv patch kubevirt kubevirt-kubevirt-hyperconverged \
+    --type=json --patch '
+    [
+        {"op":"add","path":"/spec/configuration/developerConfiguration/featureGates/-","value":"NetworkBindingPlugins"},
+        {"op":"add","path":"/spec/configuration/developerConfiguration/featureGates/-","value":"DynamicPodInterfaceNaming"}
+    ]
+'
+
+log "configure the managedTap network binding"
+
+oc -n openshift-cnv patch kubevirt kubevirt-kubevirt-hyperconverged \
+    --type=merge --patch '
+        {
+            "spec": {
+                "configuration": {
+                    "network": {
+                        "binding": {
+                            "defaultPodNetworkBinding": {
+                                "domainAttachmentType":"managedTap",
+                                "migration":{}
+                            }
+                        }
+                    }
+                }
+            }
+        }'
