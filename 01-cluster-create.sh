@@ -102,8 +102,13 @@ EOF
 # Output the cluster name
 log "Generated install-config.yaml for cluster: $CLUSTER_NAME"
 
+if [ -n "$CUSTOM_RELEASE" ]; then
+    log "Using custom OpenShift install release image: $CUSTOM_RELEASE"
+    OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=$CUSTOM_RELEASE "$DOWNLOAD_DIR/openshift-install" create cluster --dir "$INSTALL_DIR" 2>&1 | tee "$DOWNLOAD_DIR/install.log"
+else
+    "$DOWNLOAD_DIR/openshift-install" create cluster --dir "$INSTALL_DIR" 2>&1 | tee "$DOWNLOAD_DIR/install.log"
+fi
 
-"$DOWNLOAD_DIR/openshift-install" create cluster --dir "$INSTALL_DIR" 2>&1 | tee "$DOWNLOAD_DIR/install.log"
 if [ ${PIPESTATUS[0]} -ne 0 ]; then
     log "Error: openshift-install command failed."
     exit 1

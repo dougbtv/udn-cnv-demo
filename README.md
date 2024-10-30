@@ -37,6 +37,8 @@ If you want to customize, `export` any of the following variables:
 - `PULL_SECRET_PATH`: Path to the pull secret file. Default is `pull-secret.txt`.
 - `PUBKEY_PATH`: Path to the SSH public key file. Default is `ssh.pub`.
 - `AWS_REGION`: Which [AWS region](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html) will be used, default is `us-west-2`.
+- `CUSTOM_RELEASE`: A custom release image (e.g. from cluster bot), for example a value like: `registry.build09.ci.openshift.org/ci-ln-mqp72vk/release:latest`, is used only if set, set to empty to not use.
+    - See additional notes in [cluster-bot-notes.md](cluster-bot-notes.md)
 
 You can find a log of the install in the downloaded directory based on the release version in the project root, like `./openshift-$OPENSHIFT_RELEASE/install.log`, which includes your login creds.
 
@@ -68,6 +70,13 @@ No configurable options.
 
 Creates a UDN CR and launches a Fedora VM.
 
+Notes...
+
+```
+oc get ipamclaim -oyaml
+```
+
+shows if the ipamclaims have the persistent IPs.
 
 ## Validation
 
