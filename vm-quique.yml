@@ -73,7 +73,7 @@ spec:
           interfaces:
           - name: ovn-kubernetes
             binding:
-              name: managedTap
+              name: defaultPodNetworkBinding
           rng: {}
         resources:
           requests:
@@ -123,7 +123,7 @@ spec:
           interfaces:
           - name: pod
             binding:
-              name: managedTap
+              name: defaultPodNetworkBinding
           rng: {}
         resources:
           requests:
