@@ -65,10 +65,6 @@ log "Creating DataVolume from dv-url.yml."
 oc create -f dv-url.yml
 
 # Wait for DataVolume to be complete
-log "Waiting for DataVolume to be ready."
-while ! oc get dvs | grep -q 'Succeeded'; do
-    # log "DataVolume is not ready yet."
-    sleep 2
-done
+log "Wait 10 minutes for the image to upload..."
+oc wait DataVolume/fedora40-upload --for=condition=Succeeded --timeout=10m
 log "DataVolume is ready."
-log "Script completed successfully."
