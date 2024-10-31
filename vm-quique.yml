@@ -2,7 +2,7 @@
 apiVersion: k8s.cni.cncf.io/v1                                                  
 kind: NetworkAttachmentDefinition                                               
 metadata:                                                                       
-  namespace: poc1
+  namespace: namespace-c
   name: l2
 spec:                                                                           
   config: |2                                                                    
@@ -12,7 +12,7 @@ spec:
             "type": "ovn-k8s-cni-overlay",                                      
             "topology":"layer2",                                                
             "subnets": "10.100.200.0/24,2014:100:200::0/60",                                       
-            "netAttachDefName": "poc1/l2",                               
+            "netAttachDefName": "namespace-c/l2",                               
             "allowPersistentIPs": true,
             "role": "primary"
     }
@@ -20,13 +20,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: poc1
-  name: vmi-fedora-a-iperf3
+  namespace: namespace-c
+  name: fedora-vm-a-iperf3
 spec:
   type: NodePort
   ipFamilyPolicy: PreferDualStack
   selector:
-    vm.kubevirt.io/name: vmi-fedora-a
+    vm.kubevirt.io/name: fedora-vm-a
   ports:
     - protocol: TCP
       port: 5201
@@ -34,13 +34,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: poc1
-  name: vmi-fedora-b-iperf3
+  namespace: namespace-c
+  name: fedora-vm-b-iperf3
 spec:
   type: NodePort
   ipFamilyPolicy: PreferDualStack
   selector:
-    vm.kubevirt.io/name: vmi-fedora-b
+    vm.kubevirt.io/name: fedora-vm-b
   ports:
     - protocol: TCP
       port: 5201
@@ -49,9 +49,9 @@ apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
   labels:
-    special: vmi-fedora-a
-  namespace: poc1
-  name: vmi-fedora-a
+    special: fedora-vm-a
+  namespace: namespace-c
+  name: fedora-vm-a
 spec:
   running: true
   template:
@@ -94,53 +94,53 @@ spec:
                 dhcp6: true
                 ipv6-address-generation: eui64
         name: cloudinitdisk
----
-apiVersion: kubevirt.io/v1
-kind: VirtualMachine
-metadata:
-  labels:
-    special: vmi-fedora-b
-  namespace: poc1
-  name: vmi-fedora-b
-spec:
-  running: true
-  template:
-    spec:
-      domain:
-        devices:
-          disks:
-          - disk:
-              bus: virtio
-            name: containerdisk
-          - disk:
-              bus: virtio
-            name: cloudinitdisk
-          interfaces:
-          - name: pod
-            binding:
-              name: defaultPodNetworkBinding
-          rng: {}
-        resources:
-          requests:
-            memory: 1024M
-      networks:
-      - name: pod
-        pod: {}
-      terminationGracePeriodSeconds: 0
-      volumes:
-      - containerDisk:
-          image: quay.io/ellorent/fedora-with-test-tooling:tcpdump
-        name: containerdisk
-      - cloudInitNoCloud:
-          userData: |-
-            #cloud-config
-            password: fedora
-            chpasswd: { expire: False }
-          networkData: |-
-            version: 2
-            ethernets:
-              eth0:
-                dhcp4: true
-                dhcp6: true
-                ipv6-address-generation: eui64
-        name: cloudinitdisk
+# ---
+# apiVersion: kubevirt.io/v1
+# kind: VirtualMachine
+# metadata:
+#   labels:
+#     special: fedora-vm-b
+#   namespace: namespace-c
+#   name: fedora-vm-b
+# spec:
+#   running: true
+#   template:
+#     spec:
+#       domain:
+#         devices:
+#           disks:
+#           - disk:
+#               bus: virtio
+#             name: containerdisk
+#           - disk:
+#               bus: virtio
+#             name: cloudinitdisk
+#           interfaces:
+#           - name: pod
+#             binding:
+#               name: defaultPodNetworkBinding
+#           rng: {}
+#         resources:
+#           requests:
+#             memory: 1024M
+#       networks:
+#       - name: pod
+#         pod: {}
+#       terminationGracePeriodSeconds: 0
+#       volumes:
+#       - containerDisk:
+#           image: quay.io/ellorent/fedora-with-test-tooling:tcpdump
+#         name: containerdisk
+#       - cloudInitNoCloud:
+#           userData: |-
+#             #cloud-config
+#             password: fedora
+#             chpasswd: { expire: False }
+#           networkData: |-
+#             version: 2
+#             ethernets:
+#               eth0:
+#                 dhcp4: true
+#                 dhcp6: true
+#                 ipv6-address-generation: eui64
+#         name: cloudinitdisk

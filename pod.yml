@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: samplepod
+  name: pingpod
 spec:
   containers:
-  - name: samplepod
+  - name: pingpod
     command: ["/bin/ash", "-c", "trap : TERM INT; sleep infinity & wait"]
     image: quay.io/dougbtv/alpine
     securityContext:

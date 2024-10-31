@@ -6,16 +6,16 @@ log() {
   echo "$(date '+%Y-%m-%d %H:%M:%S') - $message"
 }
 
-log "creating poc1 namespace"
+log "creating namespace-c namespace"
 oc create -f ns-quique.yml
-oc project poc1
+oc project namespace-c
 
 # Preload pod image
 log "Creating DaemonSet for image preload..."
 oc apply -f image-preload.yml
 
 log "Waiting for all DaemonSet pods to be ready..."
-oc wait --for=jsonpath='{.status.numberAvailable}'=$(oc get daemonset image-preload -n poc1 -o jsonpath='{.status.desiredNumberScheduled}') daemonset/image-preload -n poc1 --timeout=5m
+oc wait --for=jsonpath='{.status.numberAvailable}'=$(oc get daemonset image-preload -n namespace-c -o jsonpath='{.status.desiredNumberScheduled}') daemonset/image-preload -n namespace-c --timeout=5m
 
 log "Deleting DaemonSet for image preload..."
 oc delete -f image-preload.yml

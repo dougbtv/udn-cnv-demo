@@ -1,7 +1,7 @@
 apiVersion: k8s.ovn.org/v1
 kind: UserDefinedNetwork
 metadata:
-  name: udn-1 
+  name: network-c
 spec:
   topology: Layer2 
   layer2: 
