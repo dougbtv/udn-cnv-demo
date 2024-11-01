@@ -11,14 +11,44 @@ oc create -f ns-quique.yml
 oc project namespace-c
 
 # Preload pod image
-log "Creating DaemonSet for image preload..."
+log "Creating DaemonSet for pod image preload..."
 oc apply -f image-preload.yml
 
 log "Waiting for all DaemonSet pods to be ready..."
 oc wait --for=jsonpath='{.status.numberAvailable}'=$(oc get daemonset image-preload -n namespace-c -o jsonpath='{.status.desiredNumberScheduled}') daemonset/image-preload -n namespace-c --timeout=5m
 
-log "Deleting DaemonSet for image preload..."
+log "Deleting DaemonSet for pod image preload..."
 oc delete -f image-preload.yml
+
+
+oc apply -f image-preload-vm.yml
+log "Waiting for VM image to be pulled to all nodes..."
+
+DESIRED_COUNT=2
+TIMEOUT=300  # 5 minutes timeout in seconds
+INTERVAL=5   # Check every 5 seconds
+elapsed=0
+
+while true; do
+  CREATE_ERROR_COUNT=$(oc get pods -n namespace-c | grep image-preload-vm | grep -i createcontainererror | wc -l)
+
+  if [ "$CREATE_ERROR_COUNT" -eq "$DESIRED_COUNT" ]; then
+    log "All VM preload daemonset pods reached CreateContainerError, image should be cached on all nodes."
+    break
+  fi
+
+  if [ "$elapsed" -ge "$TIMEOUT" ]; then
+    log "Timeout waiting for all pods to reach CreateContainerError."
+    exit 1
+  fi
+
+  sleep "$INTERVAL"
+  ((elapsed+=INTERVAL))
+done
+
+log "Deleting DaemonSet after image preload..."
+oc delete -f image-preload-vm.yml
+
 
 log "Creating UDN, and quique VMs..."
 oc apply -f udn.yml

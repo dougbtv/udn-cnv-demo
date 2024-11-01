@@ -1,20 +1,19 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: image-preload
+  name: image-preload-vm
 spec:
   selector:
     matchLabels:
-      app: image-preload
+      app: image-preload-vm
   template:
     metadata:
       labels:
-        app: image-preload
+        app: image-preload-vm
     spec:
       containers:
       - name: preload
         image: quay.io/ellorent/fedora-with-test-tooling:tcpdump
-        command: ["/bin/bash", "-c", "sleep 3600"] # Keeps the container running temporarily
       tolerations:
       - operator: Exists
       nodeSelector:
