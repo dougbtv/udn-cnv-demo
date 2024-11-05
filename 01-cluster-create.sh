@@ -50,6 +50,18 @@ for file in $PULL_SECRET_PATH $PUBKEY_PATH; do
     fi
 done
 
+# Check if INSTALL_DIR exists
+if [ -d "$INSTALL_DIR" ]; then
+  log "$INSTALL_DIR exists. Removing and recreating it."
+  rm -rf "$INSTALL_DIR"
+else
+  log "$INSTALL_DIR does not exist. Creating it."
+fi
+
+# Recreate the directory
+mkdir -p "$INSTALL_DIR"
+log "$INSTALL_DIR has been created."
+
 # Build the cluster name from exported variable or generate it
 CLUSTER_NAME="${CLUSTER_NAME:-$(whoami)cnvmetal$(date +%d)}"
 
