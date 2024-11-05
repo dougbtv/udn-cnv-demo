@@ -7,12 +7,12 @@ log() {
 }
 
 # Create a new project
-log "Creating a new project called 'demo'."
-oc new-project demo
+log "Creating a new project called 'doug-storage'."
+oc new-project doug-storage
 
 # Set the namespace to use privileged security context
-log "Setting security context to privileged for the demo namespace."
-oc label --overwrite ns demo pod-security.kubernetes.io/enforce=privileged
+log "Setting security context to privileged for the doug-storage namespace."
+oc label --overwrite ns doug-storage pod-security.kubernetes.io/enforce=privileged
 
 # Deploy NFS
 log "Deploying NFS server."
