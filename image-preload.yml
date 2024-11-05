@@ -11,10 +11,17 @@ spec:
       labels:
         app: image-preload
     spec:
+      # Add an initContainer to preload additional images
+      initContainers:
+      - name: preload-iperf3
+        image: networkstatic/iperf3
+        command: ["true"]  # Runs a no-op command just to pull the image
+
       containers:
       - name: preload
         image: quay.io/dougbtv/alpine
         command: ["sh", "-c", "sleep 3600"] # Keeps the container running temporarily
+
       tolerations:
       - operator: Exists
       nodeSelector:

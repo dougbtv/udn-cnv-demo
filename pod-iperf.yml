@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: iperf3-client
+  namespace: namespace-c
+spec:
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+  - name: iperf3
+    image: networkstatic/iperf3
+    # I had some trouble with the service access?
+    # command: ["sh", "-c", "trap : TERM INT; while true; do stdbuf -oL iperf3 -c fedora-vm-a-iperf3.namespace-c.svc.cluster.local -p 5201 -t 120 -i 1; sleep 2; done"]
+    command: ["sh", "-c", "trap : TERM INT; while true; do stdbuf -oL iperf3 -c 10.0.0.5 -p 5201 -t 120 -i 1; sleep 2; done"]
+    imagePullPolicy: IfNotPresent
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      runAsNonRoot: true
+  restartPolicy: Never
