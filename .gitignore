@@ -3,3 +3,4 @@ ssh.pub
 openshift-*/
 all.log
 ipam-extensions/
+*kubeconfig*
