@@ -24,7 +24,7 @@ oc delete -f image-preload.yml
 oc apply -f image-preload-vm.yml
 log "Waiting for VM image to be pulled to all nodes..."
 
-DESIRED_COUNT=2
+DESIRED_COUNT=3
 TIMEOUT=300  # 5 minutes timeout in seconds
 INTERVAL=5   # Check every 5 seconds
 elapsed=0
@@ -39,7 +39,7 @@ while true; do
 
   if [ "$elapsed" -ge "$TIMEOUT" ]; then
     log "Timeout waiting for all pods to reach CreateContainerError."
-    exit 1
+    log "Continuing anyway..."
   fi
 
   sleep "$INTERVAL"
