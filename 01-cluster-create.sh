@@ -69,6 +69,8 @@ CLUSTER_NAME="${CLUSTER_NAME:-$(whoami)cnvmetal$(date +%d)}"
 PULL_SECRET=$(jq -c . < "$PULL_SECRET_PATH")
 SSH_KEY=$(cat "$PUBKEY_PATH")
 
+NUMBER_OF_WORKERS="${NUMBER_OF_WORKERS:-3}"
+
 # Create the YAML file
 cat > "$INSTALL_DIR/install-config.yaml" <<EOF
 ---
@@ -83,7 +85,7 @@ compute:
   platform:
     aws:
       type: m5.metal
-  replicas: 2
+  replicas: $NUMBER_OF_WORKERS
 controlPlane:
   architecture: amd64
   hyperthreading: Enabled
