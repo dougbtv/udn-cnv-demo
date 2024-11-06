@@ -15,12 +15,12 @@ spec:
       initContainers:
       - name: preload-iperf3
         image: networkstatic/iperf3
-        command: ["true"]  # Runs a no-op command just to pull the image
+        command: ["true"]
 
       containers:
       - name: preload
         image: quay.io/dougbtv/alpine
-        command: ["sh", "-c", "sleep 3600"] # Keeps the container running temporarily
+        command: ["sh", "-c", "sleep 3600"]
 
       tolerations:
       - operator: Exists
